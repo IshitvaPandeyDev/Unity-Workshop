@@ -1,6 +1,10 @@
 # Unity .gitignore Template
 # Source: https://github.com/github/gitignore/blob/main/Unity.gitignore
+<<<<<<< HEAD
 # Last synced: 2026-07-02
+=======
+# Last synced: 2025-12-18
+>>>>>>> cf946ae55b3a5802bde4b2c7098960bdc6836714
 # License: CC0-1.0
 #
 # This template is maintained from the github/gitignore repository
@@ -10,9 +14,12 @@
 #
 # Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
 #
+<<<<<<< HEAD
 # Recommended: add any editor/OS/tool-specific ignore rules from the Global/ templates as needed.
 # See: https://github.com/github/gitignore/tree/main/Global
 #
+=======
+>>>>>>> cf946ae55b3a5802bde4b2c7098960bdc6836714
 .utmp/
 /[Ll]ibrary/
 /[Tt]emp/
@@ -23,7 +30,11 @@
 /[Uu]ser[Ss]ettings/
 *.log
 
+<<<<<<< HEAD
 # By default unity supports Blender asset imports, *.blend1 blender files do not need to be commited to version control.
+=======
+# By default unity supports Blender asset imports, *.blend1 blender files do not need to be committed to version control.
+>>>>>>> cf946ae55b3a5802bde4b2c7098960bdc6836714
 *.blend1
 *.blend1.meta
 
@@ -54,7 +65,10 @@ ExportedObj/
 *.csproj
 *.unityproj
 *.sln
+<<<<<<< HEAD
 *.slnx
+=======
+>>>>>>> cf946ae55b3a5802bde4b2c7098960bdc6836714
 *.suo
 *.tmp
 *.user
@@ -109,6 +123,7 @@ InitTestScene*.unity*
 
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+<<<<<<< HEAD
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
@@ -121,3 +136,5 @@ UserSettings/
 .vs/
 *.csproj
 *.sln
+=======
+>>>>>>> cf946ae55b3a5802bde4b2c7098960bdc6836714

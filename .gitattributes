@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Unity .gitattributes Template
 # Source: https://github.com/gitattributes/gitattributes/blob/master/Unity.gitattributes
 # Last synced: 2026-02-04
@@ -169,3 +170,7 @@ Packages/packages-lock.json linguist-generated
 
 # Exceptions for .asset files such as lightning pre-baking
 LightingData.asset     binary
+=======
+# Auto detect text files and perform LF normalization
+* text=auto
+>>>>>>> cf946ae55b3a5802bde4b2c7098960bdc6836714

@@ -1,10 +1,7 @@
 {
   "dependencies": {
     "com.unity.ai.navigation": "2.0.14",
-<<<<<<< HEAD
-=======
     "com.unity.collab-proxy": "2.13.6",
->>>>>>> cf946ae55b3a5802bde4b2c7098960bdc6836714
     "com.unity.ide.rider": "3.0.40",
     "com.unity.ide.visualstudio": "2.0.26",
     "com.unity.inputsystem": "1.20.0",
@@ -50,8 +47,4 @@
     "com.unity.modules.wind": "1.0.0",
     "com.unity.modules.xr": "1.0.0"
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> cf946ae55b3a5802bde4b2c7098960bdc6836714

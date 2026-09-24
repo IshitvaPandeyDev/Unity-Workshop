@@ -11,24 +11,31 @@ public class ParkourController : MonoBehaviour
 
     [Header("Ledge Climbing Settings")]
     public float ledgeGrabDistance = 1f;
-    public Transform ledgeRaycastPoint; // Assign an empty GameObject placed near the player's chest/head
-    public float climbDuration = 1.2f; // Time it takes for the climb animation to finish
+    public Transform ledgeRaycastPoint;
+    public float climbDuration = 1.2f;
+    [Tooltip("Which layers can the player climb? (Don't include the floor/cylinders)")]
+    public LayerMask climbableLayers = ~0;
 
     private CharacterController controller;
     private Animator animator;
     private Vector3 velocity;
     private bool isGrounded;
     private bool isClimbing = false;
-
-    // Add a reference to the main camera
     private Transform mainCameraTransform;
+
+    // Platform Tracking Variables
+    private Collider currentPlatform;
+    private Vector3 lastPlatformPosition;
+    private Quaternion lastPlatformRotation;
+
+    // NEW: Air time tracking to prevent instantly grabbing ledges you just fell off
+    private float airTime = 0f;
 
     void Start()
     {
         controller = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
 
-        // Cache the camera transform at start
         if (Camera.main != null)
         {
             mainCameraTransform = Camera.main.transform;
@@ -37,14 +44,23 @@ public class ParkourController : MonoBehaviour
 
     void Update()
     {
-        // Freeze manual movement while the climb animation plays
         if (isClimbing) return;
 
         HandleMovement();
         HandleJump();
 
-        // Only look for a ledge if the player is falling or mid-air
-        if (!isGrounded && velocity.y <= 0)
+        // Track how long the player has been in the air
+        if (isGrounded)
+        {
+            airTime = 0f;
+        }
+        else
+        {
+            airTime += Time.deltaTime;
+        }
+
+        // Only allow ledge grabbing if falling AND we've been in the air for at least 0.25 seconds
+        if (!isGrounded && velocity.y <= 0 && airTime > 0.25f)
         {
             DetectLedge();
         }
@@ -53,33 +69,64 @@ public class ParkourController : MonoBehaviour
     private void HandleMovement()
     {
         isGrounded = controller.isGrounded;
+
         if (isGrounded && velocity.y < 0)
         {
-            velocity.y = -2f; // Forces the player to stick to the ground smoothly
+            velocity.y = -2f;
         }
 
-        float x = Input.GetAxis("Horizontal"); // A/D keys
-        float z = Input.GetAxis("Vertical");   // W/S keys
+        Vector3 platformVelocity = Vector3.zero;
 
-        // --- CAMERA-RELATIVE MOVEMENT UPDATE ---
+        if (isGrounded && Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, out RaycastHit hit, 0.5f))
+        {
+            if (!hit.transform.IsChildOf(this.transform))
+            {
+                if (hit.collider != currentPlatform)
+                {
+                    currentPlatform = hit.collider;
+                    lastPlatformPosition = currentPlatform.transform.position;
+                    lastPlatformRotation = currentPlatform.transform.rotation;
+                }
+
+                if (currentPlatform != null)
+                {
+                    Vector3 positionDelta = currentPlatform.transform.position - lastPlatformPosition;
+                    Quaternion rotationDelta = currentPlatform.transform.rotation * Quaternion.Inverse(lastPlatformRotation);
+
+                    Matrix4x4 platformMatrix = Matrix4x4.TRS(currentPlatform.transform.position, rotationDelta, Vector3.one);
+                    Vector3 localPositionOnPlatform = transform.position - currentPlatform.transform.position;
+                    Vector3 newPositionDueToRotation = platformMatrix.MultiplyPoint3x4(localPositionOnPlatform);
+
+                    Vector3 rotationMovement = newPositionDueToRotation - localPositionOnPlatform;
+
+                    platformVelocity = positionDelta + rotationMovement;
+
+                    lastPlatformPosition = currentPlatform.transform.position;
+                    lastPlatformRotation = currentPlatform.transform.rotation;
+                }
+            }
+        }
+        else
+        {
+            currentPlatform = null;
+        }
+
+        float x = Input.GetAxis("Horizontal");
+        float z = Input.GetAxis("Vertical");
         Vector3 move;
 
         if (mainCameraTransform != null)
         {
-            // Get the camera's forward and right vectors
             Vector3 cameraForward = mainCameraTransform.forward;
             Vector3 cameraRight = mainCameraTransform.right;
 
-            // Flatten the vectors so looking up/down doesn't push the character into the floor or sky
             cameraForward.y = 0f;
             cameraRight.y = 0f;
             cameraForward.Normalize();
             cameraRight.Normalize();
 
-            // Calculate movement direction relative to camera
             move = (cameraForward * z + cameraRight * x).normalized;
 
-            // Optional: Rotate the character body to face the movement direction
             if (move != Vector3.zero)
             {
                 transform.forward = move;
@@ -87,13 +134,12 @@ public class ParkourController : MonoBehaviour
         }
         else
         {
-            // Fallback to local transform if camera is missing
             move = (transform.right * x + transform.forward * z).normalized;
         }
 
-        controller.Move(move * moveSpeed * Time.deltaTime);
+        Vector3 finalMovement = (move * moveSpeed * Time.deltaTime) + platformVelocity;
+        controller.Move(finalMovement);
 
-        // Send speed to Animator for walking/running animations
         if (animator != null)
         {
             animator.SetFloat("Speed", move.magnitude);
@@ -105,11 +151,11 @@ public class ParkourController : MonoBehaviour
         if (Input.GetButtonDown("Jump") && isGrounded)
         {
             velocity.y = Mathf.Sqrt(jumpForce * -2f * gravity);
+            currentPlatform = null;
 
             if (animator != null) animator.SetTrigger("Jump");
         }
 
-        // Apply gravity over time
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
     }
@@ -118,12 +164,11 @@ public class ParkourController : MonoBehaviour
     {
         Vector3 origin = ledgeRaycastPoint != null ? ledgeRaycastPoint.position : transform.position + Vector3.up * 1.5f;
 
-        // 1. Raycast forward to find the wall
-        if (Physics.Raycast(origin, transform.forward, out RaycastHit wallHit, ledgeGrabDistance))
+        // NEW: The raycast now respects the 'climbableLayers' mask
+        if (Physics.Raycast(origin, transform.forward, out RaycastHit wallHit, ledgeGrabDistance, climbableLayers))
         {
-            // 2. Raycast downward just past the wall to find the top edge of the ledge
             Vector3 downRayOrigin = origin + (transform.forward * ledgeGrabDistance) + (Vector3.up * 1f);
-            if (Physics.Raycast(downRayOrigin, Vector3.down, out RaycastHit edgeHit, 1.5f))
+            if (Physics.Raycast(downRayOrigin, Vector3.down, out RaycastHit edgeHit, 1.5f, climbableLayers))
             {
                 StartCoroutine(PerformLedgeClimb(edgeHit.point));
             }
@@ -133,20 +178,17 @@ public class ParkourController : MonoBehaviour
     private IEnumerator PerformLedgeClimb(Vector3 targetLedgePosition)
     {
         isClimbing = true;
-        velocity = Vector3.zero; // Stop falling momentum
+        velocity = Vector3.zero;
 
-        // Trigger the climbing animation
         if (animator != null)
         {
             animator.SetTrigger("LedgeClimb");
         }
 
-        // Wait for the animation to play out (adjust climbDuration in the Inspector to match your animation)
         yield return new WaitForSeconds(climbDuration);
 
-        // Snap the character to the top of the ledge once the animation finishes
-        controller.enabled = false; // Disable controller briefly to allow manual position overriding
-        transform.position = targetLedgePosition + (Vector3.up * 0.1f); // Slight offset to prevent clipping
+        controller.enabled = false;
+        transform.position = targetLedgePosition + (Vector3.up * 0.1f);
         controller.enabled = true;
 
         isClimbing = false;

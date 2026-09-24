@@ -1770,6 +1770,8 @@ GameObject:
   - component: {fileID: 68127035}
   - component: {fileID: 68127034}
   - component: {fileID: 68127033}
+  - component: {fileID: 68127038}
+  - component: {fileID: 68127037}
   m_Layer: 0
   m_Name: Capsule (1)
   m_TagString: Untagged
@@ -1872,6 +1874,47 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 43.754}
+--- !u!114 &68127037
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 68127032}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9705c466b478ce499fd2bde7d91ffe1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RotatingPlatform
+  rotationAxis: {x: 0, y: 0, z: 1}
+  rotationSpeed: 30
+--- !u!54 &68127038
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 68127032}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!43 &89650890
 Mesh:
   m_ObjectHideFlags: 0
@@ -3378,6 +3421,8 @@ GameObject:
   - component: {fileID: 268871497}
   - component: {fileID: 268871496}
   - component: {fileID: 268871495}
+  - component: {fileID: 268871500}
+  - component: {fileID: 268871499}
   m_Layer: 0
   m_Name: Capsule (2)
   m_TagString: Untagged
@@ -3480,6 +3525,47 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 114.622}
+--- !u!114 &268871499
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 268871494}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9705c466b478ce499fd2bde7d91ffe1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RotatingPlatform
+  rotationAxis: {x: 0, y: 0, z: 1}
+  rotationSpeed: 30
+--- !u!54 &268871500
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 268871494}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &312919509
 GameObject:
   m_ObjectHideFlags: 0
@@ -3680,7 +3766,7 @@ Transform:
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
   m_LocalRotation: {x: 0.15212338, y: 0, z: 0, w: 0.98836154}
-  m_LocalPosition: {x: 40.64, y: 32.393528, z: -24.202387}
+  m_LocalPosition: {x: 40.64, y: 31.663528, z: -24.202387}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3808,9 +3894,6 @@ MonoBehaviour:
   ledgeGrabDistance: 1
   ledgeRaycastPoint: {fileID: 0}
   climbDuration: 1.2
-  climbableLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
 --- !u!143 &345002314
 CharacterController:
   m_ObjectHideFlags: 0
@@ -5480,7 +5563,7 @@ Transform:
   m_GameObject: {fileID: 497161817}
   serializedVersion: 2
   m_LocalRotation: {x: 0.15212338, y: 0, z: 0, w: 0.98836154}
-  m_LocalPosition: {x: 40.64, y: 32.393528, z: -24.202387}
+  m_LocalPosition: {x: 40.64, y: 31.663528, z: -24.202387}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -14727,7 +14810,7 @@ MeshCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 5
-  m_Convex: 0
+  m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 895065754}
 --- !u!33 &1295052645
@@ -17951,6 +18034,8 @@ GameObject:
   - component: {fileID: 1502536893}
   - component: {fileID: 1502536892}
   - component: {fileID: 1502536891}
+  - component: {fileID: 1502536896}
+  - component: {fileID: 1502536895}
   m_Layer: 0
   m_Name: Capsule (3)
   m_TagString: Untagged
@@ -18053,6 +18138,47 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 51.16}
+--- !u!114 &1502536895
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1502536890}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9705c466b478ce499fd2bde7d91ffe1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RotatingPlatform
+  rotationAxis: {x: 0, y: 0, z: 1}
+  rotationSpeed: 30
+--- !u!54 &1502536896
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1502536890}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &1516321229
 GameObject:
   m_ObjectHideFlags: 0
@@ -18779,7 +18905,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 5295624daf2792141ad555cfcab21b18, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 30.89
+      value: 30.16
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 5295624daf2792141ad555cfcab21b18, type: 3}
       propertyPath: m_LocalPosition.z
@@ -21070,6 +21196,8 @@ GameObject:
   - component: {fileID: 1995818892}
   - component: {fileID: 1995818891}
   - component: {fileID: 1995818890}
+  - component: {fileID: 1995818895}
+  - component: {fileID: 1995818894}
   m_Layer: 0
   m_Name: Capsule
   m_TagString: Untagged
@@ -21172,6 +21300,47 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 130.52}
+--- !u!114 &1995818894
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1995818889}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9705c466b478ce499fd2bde7d91ffe1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RotatingPlatform
+  rotationAxis: {x: 0, y: 0, z: 1}
+  rotationSpeed: 30
+--- !u!54 &1995818895
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1995818889}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!43 &2008767452
 Mesh:
   m_ObjectHideFlags: 0

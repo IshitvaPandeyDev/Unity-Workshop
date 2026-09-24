@@ -20,10 +20,19 @@ public class ParkourController : MonoBehaviour
     private bool isGrounded;
     private bool isClimbing = false;
 
+    // Add a reference to the main camera
+    private Transform mainCameraTransform;
+
     void Start()
     {
         controller = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
+
+        // Cache the camera transform at start
+        if (Camera.main != null)
+        {
+            mainCameraTransform = Camera.main.transform;
+        }
     }
 
     void Update()
@@ -52,7 +61,36 @@ public class ParkourController : MonoBehaviour
         float x = Input.GetAxis("Horizontal"); // A/D keys
         float z = Input.GetAxis("Vertical");   // W/S keys
 
-        Vector3 move = transform.right * x + transform.forward * z;
+        // --- CAMERA-RELATIVE MOVEMENT UPDATE ---
+        Vector3 move;
+
+        if (mainCameraTransform != null)
+        {
+            // Get the camera's forward and right vectors
+            Vector3 cameraForward = mainCameraTransform.forward;
+            Vector3 cameraRight = mainCameraTransform.right;
+
+            // Flatten the vectors so looking up/down doesn't push the character into the floor or sky
+            cameraForward.y = 0f;
+            cameraRight.y = 0f;
+            cameraForward.Normalize();
+            cameraRight.Normalize();
+
+            // Calculate movement direction relative to camera
+            move = (cameraForward * z + cameraRight * x).normalized;
+
+            // Optional: Rotate the character body to face the movement direction
+            if (move != Vector3.zero)
+            {
+                transform.forward = move;
+            }
+        }
+        else
+        {
+            // Fallback to local transform if camera is missing
+            move = (transform.right * x + transform.forward * z).normalized;
+        }
+
         controller.Move(move * moveSpeed * Time.deltaTime);
 
         // Send speed to Animator for walking/running animations

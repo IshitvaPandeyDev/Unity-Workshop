@@ -6,6 +6,7 @@ public class ParkourController : MonoBehaviour
 {
     [Header("Movement Settings")]
     public float moveSpeed = 6f;
+    public float sprintSpeed = 10f;
     public float jumpForce = 5f;
     public float gravity = -9.81f;
 
@@ -140,13 +141,35 @@ public class ParkourController : MonoBehaviour
             move = (transform.right * x + transform.forward * z).normalized;
         }
 
-        Vector3 finalMovement = (move * moveSpeed * Time.deltaTime) + platformVelocity;
+        // --- SPRINT LOGIC & ANIMATION ---
+        float currentSpeed = moveSpeed;
+        bool isSprinting = false;
 
+        // Check if the player is holding the Left Shift key AND the W key
+        if (Input.GetKey(KeyCode.LeftShift) && z > 0.1f)
+        {
+            currentSpeed = sprintSpeed;
+            isSprinting = true;
+        }
+
+        // Apply the calculated speed
+        Vector3 finalMovement = (move * currentSpeed * Time.deltaTime) + platformVelocity;
         controller.Move(finalMovement);
 
+        // Update the Animator
         if (animator != null)
         {
-            animator.SetFloat("Speed", move.magnitude);
+            if (move.magnitude > 0)
+            {
+                // Send 2f for sprint, 1f for walk/run
+                float animationSpeedValue = isSprinting ? 2f : 1f;
+                animator.SetFloat("Speed", animationSpeedValue);
+            }
+            else
+            {
+                // Send 0f for idle
+                animator.SetFloat("Speed", 0f);
+            }
         }
     }
 
@@ -204,7 +227,7 @@ public class ParkourController : MonoBehaviour
         }
     }
 
-    // NEW: Replaces OnTriggerEnter. This detects when a Character Controller bumps into solid objects.
+    // Detects when a Character Controller bumps into solid objects.
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
         // Check if the solid object we are touching is on the "Checkpoint" layer

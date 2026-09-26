@@ -33,6 +33,17 @@ public class ParkourController : MonoBehaviour
     private Vector3 lastPlatformPosition;
     private Quaternion lastPlatformRotation;
 
+    // =====================================================
+    // LONG FALL - ADDED
+    // =====================================================
+    private float fallStartHeight;
+    private float fallStartTime;
+    private bool wasGrounded;
+    private bool isLongFalling;
+
+    public float longFallDistance = 5f;
+    public float minimumFallTime = 0.15f;
+
     // --- Respawn Tracking ---
     private float activePlatformHeight;
     private Vector3 lastCheckpointPosition;
@@ -50,6 +61,9 @@ public class ParkourController : MonoBehaviour
         {
             mainCameraTransform = Camera.main.transform;
         }
+
+        // LONG FALL - ADDED
+        wasGrounded = controller.isGrounded;
     }
 
     void Update()
@@ -57,6 +71,9 @@ public class ParkourController : MonoBehaviour
         HandleRespawn();
         HandleMovement();
         HandleJump();
+
+        // LONG FALL - ADDED
+        HandleLongFall();
     }
 
     private void HandleMovement()
@@ -236,5 +253,64 @@ public class ParkourController : MonoBehaviour
             // Update the respawn location to the center of this solid block
             lastCheckpointPosition = hit.gameObject.transform.position;
         }
+    }
+
+    // =====================================================
+    // LONG FALL SYSTEM - ADDED
+    // =====================================================
+
+    private void HandleLongFall()
+    {
+        bool currentlyGrounded = controller.isGrounded;
+
+        // Player just left the ground
+        if (wasGrounded && !currentlyGrounded)
+        {
+            fallStartHeight = transform.position.y;
+            fallStartTime = Time.time;
+
+            isLongFalling = false;
+
+            if (animator != null)
+            {
+                animator.SetBool("LongFall", false);
+            }
+        }
+
+        // Player is falling downward
+        if (!currentlyGrounded && velocity.y < 0f)
+        {
+            float fallDistance =
+                fallStartHeight - transform.position.y;
+
+            float fallTime =
+                Time.time - fallStartTime;
+
+            // Trigger long-fall animation
+            if (!isLongFalling &&
+                fallDistance >= longFallDistance &&
+                fallTime >= minimumFallTime)
+            {
+                isLongFalling = true;
+
+                if (animator != null)
+                {
+                    animator.SetBool("LongFall", true);
+                }
+            }
+        }
+
+        // Player has landed
+        if (!wasGrounded && currentlyGrounded)
+        {
+            isLongFalling = false;
+
+            if (animator != null)
+            {
+                animator.SetBool("LongFall", false);
+            }
+        }
+
+        wasGrounded = currentlyGrounded;
     }
 }

@@ -10,8 +10,12 @@ public class ParkourController : MonoBehaviour
     public float gravity = -9.81f;
 
     [Header("Jump Feel Settings")]
-    public float coyoteTime = 0.2f;    // How long you can still jump after falling off a ledge
-    public float jumpBufferTime = 0.2f; // How early you can press jump before landing
+    public float coyoteTime = 0.2f;
+    public float jumpBufferTime = 0.2f;
+
+    [Header("Respawn & Checkpoints")]
+    [Tooltip("How far the player must fall below their active platform to trigger a respawn")]
+    public float fallRespawnDistance = 20f;
 
     private CharacterController controller;
     private Animator animator;
@@ -27,55 +31,51 @@ public class ParkourController : MonoBehaviour
     private Collider currentPlatform;
     private Vector3 lastPlatformPosition;
     private Quaternion lastPlatformRotation;
-    // --- Long Fall Tracking Variables --- new req for fall
-    private float fallStartHeight;
-    private float fallStartTime;
-    private bool wasGrounded;
-    private bool isLongFalling;
 
-    public float longFallDistance = 5f;
-    public float minimumFallTime = 0.15f;
+    // --- Respawn Tracking ---
+    private float activePlatformHeight;
+    private Vector3 lastCheckpointPosition;
 
     void Start()
     {
         controller = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
 
+        // Initialize both heights and checkpoints to the starting position
+        activePlatformHeight = transform.position.y;
+        lastCheckpointPosition = transform.position;
+
         if (Camera.main != null)
         {
             mainCameraTransform = Camera.main.transform;
         }
-        wasGrounded = controller.isGrounded; //fall
     }
 
     void Update()
     {
+        HandleRespawn();
         HandleMovement();
         HandleJump();
-        HandleLongFall();//fall
     }
 
     private void HandleMovement()
     {
         isGrounded = controller.isGrounded;
 
-        // Ensure character sticks to the ground
         if (isGrounded && velocity.y < 0)
         {
             velocity.y = -2f;
+
+            // Constantly track the height of the current stable ground
+            activePlatformHeight = transform.position.y;
         }
 
-        // --- Calculate Moving Platform Velocity ---
         Vector3 platformVelocity = Vector3.zero;
 
-        // Only perform platform math if the Character Controller confirms we are grounded,
-        // AND the downward velocity has stopped (meaning we actually landed).
         if (isGrounded && velocity.y <= -2f)
         {
-            // We use a short raycast (0.3f) because we know we are grounded.
             if (Physics.Raycast(transform.position + (Vector3.up * 0.1f), Vector3.down, out RaycastHit hit, 0.3f))
             {
-                // Only calculate moving platform math if the object actually has a Rigidbody
                 if (hit.rigidbody != null && !hit.transform.IsChildOf(this.transform))
                 {
                     if (hit.collider != currentPlatform)
@@ -113,7 +113,6 @@ public class ParkourController : MonoBehaviour
             currentPlatform = null;
         }
 
-        // --- Standard Input Movement ---
         float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
 
@@ -141,7 +140,6 @@ public class ParkourController : MonoBehaviour
             move = (transform.right * x + transform.forward * z).normalized;
         }
 
-        // Combine Input Movement + Platform Movement 
         Vector3 finalMovement = (move * moveSpeed * Time.deltaTime) + platformVelocity;
 
         controller.Move(finalMovement);
@@ -154,8 +152,6 @@ public class ParkourController : MonoBehaviour
 
     private void HandleJump()
     {
-        // --- Update Timers ---
-        // Coyote Time
         if (isGrounded)
         {
             coyoteTimeCounter = coyoteTime;
@@ -165,7 +161,6 @@ public class ParkourController : MonoBehaviour
             coyoteTimeCounter -= Time.deltaTime;
         }
 
-        // Jump Buffer
         if (Input.GetButtonDown("Jump"))
         {
             jumpBufferCounter = jumpBufferTime;
@@ -175,87 +170,48 @@ public class ParkourController : MonoBehaviour
             jumpBufferCounter -= Time.deltaTime;
         }
 
-        // --- Execute Jump Logic ---
-        // If the player pressed jump recently AND they were on the ground recently
         if (jumpBufferCounter > 0f && coyoteTimeCounter > 0f)
         {
             velocity.y = Mathf.Sqrt(jumpForce * -2f * gravity);
-
-            // Prevent double jumping by resetting both timers instantly
             jumpBufferCounter = 0f;
             coyoteTimeCounter = 0f;
-
-            // Clear the current platform so we don't inherit rotation mid-air
             currentPlatform = null;
 
             if (animator != null) animator.SetTrigger("Jump");
-            //if (animator!=null) {animator.set<DATATYPE>("animname");
         }
 
-        // Stop upward velocity if the player releases the jump button early (Variable Jump Height)
         if (Input.GetButtonUp("Jump") && velocity.y > 0f)
         {
-            velocity.y *= 0.5f; // Cuts current upward speed in half
-            coyoteTimeCounter = 0f; // Ensure they can't double jump
+            velocity.y *= 0.5f;
+            coyoteTimeCounter = 0f;
         }
 
-        // Apply gravity
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
-    }   
- private void HandleLongFall()
+    }
+
+    private void HandleRespawn()
     {
-        bool currentlyGrounded = controller.isGrounded;
-
-        // Player just left the ground
-        if (wasGrounded && !currentlyGrounded)
+        if (transform.position.y < activePlatformHeight - fallRespawnDistance)
         {
-            fallStartHeight = transform.position.y;
-            fallStartTime = Time.time;
+            controller.enabled = false;
 
-            isLongFalling = false;
+            // Teleport to the top of the solid checkpoint block (added 1.5f height to ensure feet clear the block)
+            transform.position = lastCheckpointPosition + (Vector3.up * 1.5f);
 
-            if (animator != null)
-            {
-                animator.SetBool("LongFall", false);
-            }
+            velocity = Vector3.zero;
+            controller.enabled = true;
         }
+    }
 
-        // Player is falling downward
-        if (!currentlyGrounded && velocity.y < 0f)
+    // NEW: Replaces OnTriggerEnter. This detects when a Character Controller bumps into solid objects.
+    private void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        // Check if the solid object we are touching is on the "Checkpoint" layer
+        if (hit.gameObject.layer == LayerMask.NameToLayer("Checkpoint"))
         {
-            float fallDistance =
-                fallStartHeight - transform.position.y;
-
-            float fallTime =
-                Time.time - fallStartTime;
-
-            // Trigger long-fall animation
-            if (!isLongFalling &&
-                fallDistance >= longFallDistance &&
-                fallTime >= minimumFallTime)
-            {
-                isLongFalling = true;
-
-                if (animator != null)
-                {
-                    animator.SetBool("LongFall", true);
-                }
-            }
+            // Update the respawn location to the center of this solid block
+            lastCheckpointPosition = hit.gameObject.transform.position;
         }
-
-        // Player has landed
-        if (!wasGrounded && currentlyGrounded)
-        {
-            isLongFalling = false;
-
-            if (animator != null)
-            {
-                animator.SetBool("LongFall", false);
-            }
-        }
-
-        wasGrounded = currentlyGrounded;
     }
 }
-

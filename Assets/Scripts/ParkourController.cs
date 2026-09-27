@@ -234,9 +234,19 @@ public class ParkourController : MonoBehaviour
     {
         if (transform.position.y < activePlatformHeight - fallRespawnDistance)
         {
+            if (GameManager.Instance != null)
+            {
+                bool canRespawn = GameManager.Instance.PlayerDied();
+
+                if (!canRespawn)
+                {
+                    enabled = false;
+                    return;
+                }
+            }
+
             controller.enabled = false;
 
-            // Teleport to the top of the solid checkpoint block (added 1.5f height to ensure feet clear the block)
             transform.position = lastCheckpointPosition + (Vector3.up * 1.5f);
 
             velocity = Vector3.zero;
@@ -247,11 +257,21 @@ public class ParkourController : MonoBehaviour
     // Detects when a Character Controller bumps into solid objects.
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        // Check if the solid object we are touching is on the "Checkpoint" layer
+        // Checkpoint
         if (hit.gameObject.layer == LayerMask.NameToLayer("Checkpoint"))
         {
-            // Update the respawn location to the center of this solid block
             lastCheckpointPosition = hit.gameObject.transform.position;
+        }
+
+        // Finish
+        if (hit.collider.CompareTag("Finish"))
+        {
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.PlayerWon();
+            }
+
+            enabled = false;
         }
     }
 

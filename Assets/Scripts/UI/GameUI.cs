@@ -12,7 +12,6 @@ public class GameUI : MonoBehaviour
 
     private void Start()
     {
-        SetLives(3);
         winPanel.SetActive(false);
         gameOverPanel.SetActive(false);
     }
@@ -29,16 +28,23 @@ public class GameUI : MonoBehaviour
     {
         winPanel.SetActive(true);
         gameOverPanel.SetActive(false);
+        UnlockCursor();
     }
 
     public void ShowGameOver()
     {
         gameOverPanel.SetActive(true);
         winPanel.SetActive(false);
+        UnlockCursor();
     }
 
     public void RestartGame()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+    private void UnlockCursor()
+    {
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
     }
 }

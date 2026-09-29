@@ -15,14 +15,14 @@ public class RotatingPlatform : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        rb.isKinematic = true; // Ensure it's kinematic so we can control it via physics
+        rb.isKinematic = true; 
     }
 
     void FixedUpdate()
     {
-        // We use MoveRotation in FixedUpdate so the physics engine recognizes the movement.
-        // This is what allows the player's CharacterController to eventually stick to it.
+        
         Quaternion deltaRotation = Quaternion.Euler(rotationAxis * (rotationSpeed * Time.fixedDeltaTime));
         rb.MoveRotation(rb.rotation * deltaRotation);
     }
+
 }

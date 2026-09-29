@@ -17,8 +17,7 @@ public class MovingTile : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
 
-        // Critical: Set the Rigidbody to kinematic so it isn't affected by gravity,
-        // but still interacts with the player's Character Controller.
+        
         rb.isKinematic = true;
 
         startPosition = transform.position;
@@ -26,7 +25,6 @@ public class MovingTile : MonoBehaviour
 
     void FixedUpdate()
     {
-        // Calculate the offset using a sine wave for smooth back-and-forth motion
         float offset = Mathf.Sin(Time.time * speed) * movementDistance;
         Vector3 newPosition = startPosition;
 
@@ -39,8 +37,7 @@ public class MovingTile : MonoBehaviour
             newPosition.z += offset;
         }
 
-        // MovePosition is required for Rigidbody physics to calculate velocity correctly 
-        // for the player standing on it.
+        
         rb.MovePosition(newPosition);
     }
 }

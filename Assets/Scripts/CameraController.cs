@@ -2,7 +2,6 @@ using System;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
-
 public class CameraController : MonoBehaviour
 {
     [Header("Zoom Settings")]
@@ -12,7 +11,7 @@ public class CameraController : MonoBehaviour
     [SerializeField] private float maxDist = 15f;
 
     [Header("Sprint Zoom Settings")]
-    [SerializeField] private float sprintZoomMultiplier = 1.25f; // Expands radius by 25% (0.8x visual scale)
+    [SerializeField] private float sprintZoomMultiplier = 1.25f;
     [SerializeField] private float sprintTransitionSpeed = 6f;
 
     [Header("Look Settings")]
@@ -66,7 +65,6 @@ public class CameraController : MonoBehaviour
     {
         if (orbital == null || playerTransform == null) return;
 
-        // 1. Process normal scroll wheel and controller inputs for base zoom
         if (scrolldelta.y != 0)
         {
             targetzoom = Mathf.Clamp(targetzoom - scrolldelta.y * zoomspeed, minDist, maxDist);
@@ -79,19 +77,15 @@ public class CameraController : MonoBehaviour
             targetzoom = Mathf.Clamp(targetzoom - bumperdelta * zoomspeed, minDist, maxDist);
         }
 
-        // 2. Check if the player is actively sprinting (matches ParkourController logic)
         bool isSprinting = Input.GetKey(KeyCode.LeftShift) && Input.GetAxis("Vertical") > 0.1f;
 
-        // 3. Calculate temporary zoom target based on sprint state
         float desiredZoom = isSprinting ? targetzoom * sprintZoomMultiplier : targetzoom;
 
-        // 4. Smoothly transition to the desired zoom
         float activeLerpSpeed = isSprinting ? sprintTransitionSpeed : zoomLerpspeed;
         currentzoom = Mathf.Lerp(currentzoom, desiredZoom, Time.deltaTime * activeLerpSpeed);
 
         actualZoom = currentzoom;
 
-        // 5. Perform Raycast to prevent clipping through walls
         Vector3 directionToCamera = transform.position - playerTransform.position;
         directionToCamera.Normalize();
 
@@ -101,7 +95,6 @@ public class CameraController : MonoBehaviour
             actualZoom = Mathf.Clamp(distanceToWall, minDist, maxDist * sprintZoomMultiplier);
         }
 
-        // 6. Apply final calculated zoom to Cinemachine
         orbital.Radius = actualZoom;
     }
 

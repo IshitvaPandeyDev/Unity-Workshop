@@ -1,3 +1,4 @@
+
 using System.Collections;
 using UnityEngine;
 
@@ -24,18 +25,13 @@ public class ParkourController : MonoBehaviour
     private bool isGrounded;
     private Transform mainCameraTransform;
 
-    // --- Jump Tracking Variables ---
     private float coyoteTimeCounter;
     private float jumpBufferCounter;
 
-    // --- Platform Tracking Variables ---
     private Collider currentPlatform;
     private Vector3 lastPlatformPosition;
     private Quaternion lastPlatformRotation;
 
-    // =====================================================
-    // LONG FALL - ADDED
-    // =====================================================
     private float fallStartHeight;
     private float fallStartTime;
     private bool wasGrounded;
@@ -44,7 +40,6 @@ public class ParkourController : MonoBehaviour
     public float longFallDistance = 5f;
     public float minimumFallTime = 0.15f;
 
-    // --- Respawn Tracking ---
     private float activePlatformHeight;
     private Vector3 lastCheckpointPosition;
 
@@ -53,7 +48,6 @@ public class ParkourController : MonoBehaviour
         controller = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
 
-        // Initialize both heights and checkpoints to the starting position
         activePlatformHeight = transform.position.y;
         lastCheckpointPosition = transform.position;
 
@@ -62,7 +56,6 @@ public class ParkourController : MonoBehaviour
             mainCameraTransform = Camera.main.transform;
         }
 
-        // LONG FALL - ADDED
         wasGrounded = controller.isGrounded;
     }
 
@@ -71,8 +64,6 @@ public class ParkourController : MonoBehaviour
         HandleRespawn();
         HandleMovement();
         HandleJump();
-
-        // LONG FALL - ADDED
         HandleLongFall();
     }
 
@@ -83,8 +74,6 @@ public class ParkourController : MonoBehaviour
         if (isGrounded && velocity.y < 0)
         {
             velocity.y = -2f;
-
-            // Constantly track the height of the current stable ground
             activePlatformHeight = transform.position.y;
         }
 
@@ -158,33 +147,27 @@ public class ParkourController : MonoBehaviour
             move = (transform.right * x + transform.forward * z).normalized;
         }
 
-        // --- SPRINT LOGIC & ANIMATION ---
         float currentSpeed = moveSpeed;
         bool isSprinting = false;
 
-        // Check if the player is holding the Left Shift key AND the W key
         if (Input.GetKey(KeyCode.LeftShift) && z > 0.1f)
         {
             currentSpeed = sprintSpeed;
             isSprinting = true;
         }
 
-        // Apply the calculated speed
         Vector3 finalMovement = (move * currentSpeed * Time.deltaTime) + platformVelocity;
         controller.Move(finalMovement);
 
-        // Update the Animator
         if (animator != null)
         {
             if (move.magnitude > 0)
             {
-                // Send 2f for sprint, 1f for walk/run
                 float animationSpeedValue = isSprinting ? 2f : 1f;
                 animator.SetFloat("Speed", animationSpeedValue);
             }
             else
             {
-                // Send 0f for idle
                 animator.SetFloat("Speed", 0f);
             }
         }
@@ -254,16 +237,13 @@ public class ParkourController : MonoBehaviour
         }
     }
 
-    // Detects when a Character Controller bumps into solid objects.
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        // Checkpoint
         if (hit.gameObject.layer == LayerMask.NameToLayer("Checkpoint"))
         {
             lastCheckpointPosition = hit.gameObject.transform.position;
         }
 
-        // Finish
         if (hit.collider.CompareTag("Finish"))
         {
             if (GameManager.Instance != null)
@@ -275,15 +255,10 @@ public class ParkourController : MonoBehaviour
         }
     }
 
-    // =====================================================
-    // LONG FALL SYSTEM - ADDED
-    // =====================================================
-
     private void HandleLongFall()
     {
         bool currentlyGrounded = controller.isGrounded;
 
-        // Player just left the ground
         if (wasGrounded && !currentlyGrounded)
         {
             fallStartHeight = transform.position.y;
@@ -297,19 +272,12 @@ public class ParkourController : MonoBehaviour
             }
         }
 
-        // Player is falling downward
         if (!currentlyGrounded && velocity.y < 0f)
         {
-            float fallDistance =
-                fallStartHeight - transform.position.y;
+            float fallDistance = fallStartHeight - transform.position.y;
+            float fallTime = Time.time - fallStartTime;
 
-            float fallTime =
-                Time.time - fallStartTime;
-
-            // Trigger long-fall animation
-            if (!isLongFalling &&
-                fallDistance >= longFallDistance &&
-                fallTime >= minimumFallTime)
+            if (!isLongFalling && fallDistance >= longFallDistance && fallTime >= minimumFallTime)
             {
                 isLongFalling = true;
 
@@ -320,7 +288,6 @@ public class ParkourController : MonoBehaviour
             }
         }
 
-        // Player has landed
         if (!wasGrounded && currentlyGrounded)
         {
             isLongFalling = false;
@@ -334,3 +301,4 @@ public class ParkourController : MonoBehaviour
         wasGrounded = currentlyGrounded;
     }
 }
+
